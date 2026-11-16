@@ -1,10 +1,11 @@
+import { Suspense } from 'react';
 import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import { db, initDb, type Post } from '@/app/lib/db';
 import ArticleEditorStudio from '@/app/components/ArticleEditorStudio';
 
 interface EditPageProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{ id?: string }>;
 }
 
 function slugify(text: string) {
@@ -31,15 +32,20 @@ async function getPostById(id: string): Promise<Post | null> {
   return (result.rows[0] as unknown as Post) || null;
 }
 
-export default async function ArticleEditPage({ params }: EditPageProps) {
-  const { id } = await params;
+async function EditFormContainer({ params }: { params: Promise<{ id?: string }> }) {
+  const resolvedParams = await params;
+  const id = resolvedParams?.id;
+
+  if (!id) {
+    notFound();
+  }
+
   const post = await getPostById(id);
 
   if (!post) {
     notFound();
   }
 
-  // Server action to update the existing post in Turso SQLite
   async function updatePost(formData: FormData) {
     'use server';
 
@@ -57,7 +63,6 @@ export default async function ArticleEditPage({ params }: EditPageProps) {
 
     let slug = slugify(rawSlug || title) || `post-${Date.now()}`;
 
-    // Ensure slug uniqueness (excluding current post ID)
     const existing = await db.execute({
       sql: 'SELECT id FROM posts WHERE slug = ? AND id != ?',
       args: [slug, Number(id)],
@@ -104,7 +109,7 @@ export default async function ArticleEditPage({ params }: EditPageProps) {
   }
 
   return (
-    <main className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+    <>
       <div className="mb-8">
         <Link 
           href="/" 
@@ -131,6 +136,16 @@ export default async function ArticleEditPage({ params }: EditPageProps) {
         saveAction={updatePost}
         isEditing={true}
       />
+    </>
+  );
+}
+
+export default function ArticleEditPage({ params }: EditPageProps) {
+  return (
+    <main className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+      <Suspense fallback={<div className="py-20 text-center text-neutral-400 font-medium">Loading editor workspace...</div>}>
+        <EditFormContainer params={params} />
+      </Suspense>
     </main>
   );
 }
