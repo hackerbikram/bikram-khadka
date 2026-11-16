@@ -53,7 +53,7 @@ export default async function AdminDashboard() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 border-b border-neutral-200 pb-6">
         <div>
           <h1 className="text-3xl font-extrabold text-neutral-950">Blog Administration</h1>
-          <p className="text-sm text-neutral-500 mt-1">Manage, edit, publish, and track views across your articles.</p>
+          <p className="text-sm text-neutral-400 mt-1">Manage, edit, publish, and track views across your articles.</p>
         </div>
         <div className="flex items-center gap-3">
           <Link
@@ -65,7 +65,7 @@ export default async function AdminDashboard() {
           <form action={handleLogout}>
             <button
               type="submit"
-              className="border border-neutral-300 text-neutral-700 px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-neutral-100 transition cursor-pointer"
+              className="border border-neutral-300 text-neutral-400 px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-neutral-100 transition cursor-pointer"
             >
               Logout
             </button>

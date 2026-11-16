@@ -5,6 +5,12 @@ export const db = createClient({
   authToken: process.env.TURSO_AUTH_TOKEN,
 });
 
+export interface User {
+  id?: number;
+  email: string;
+  password: string;
+}
+
 export interface Post {
   id: number;
   title: string;
@@ -26,10 +32,20 @@ export interface Post {
 
 let dbInitialized = false;
 
+export async function createUserTable() {
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT NOT NULL UNIQUE,
+      password TEXT NOT NULL
+    )
+  `);
+}
+
 export async function initDb() {
   if (dbInitialized) return;
 
-  // 1. Create table if it doesn't exist
+  // 1. Create posts table if it doesn't exist
   await db.execute(`
     CREATE TABLE IF NOT EXISTS posts (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -51,7 +67,10 @@ export async function initDb() {
     )
   `);
 
-  // 2. Safe auto-migration: Add columns if an older database table already exists without them
+  // 2. Create users table
+  await createUserTable();
+
+  // 3. Safe auto-migration: Add columns if an older database table already exists without them
   try {
     await db.execute(`ALTER TABLE posts ADD COLUMN views INTEGER DEFAULT 0`);
   } catch {}

@@ -2,90 +2,59 @@ import Link from 'next/link';
 import { Suspense } from 'react';
 import { db, initDb, type Post } from '@/app/lib/db';
 import type { Metadata } from 'next';
+import ArticleExplorer from '@/app/components/ArticleExplorer';
 
-// ==================================================
-// CONFIGURATION
-// ==================================================
-
-const SITE_NAME = 'Bikram';
+const SITE_NAME = 'Bikram Article';
+const AUTHOR_NAME = 'Bikram Khadka';
 const SITE_DESCRIPTION =
-  'Explore practical insights on software development, technology, programming and business innovation.';
+  'Official blog and technical journal by Bikram Khadka (Bikram Article). Explore practical tutorials on software development, Python, Next.js, web engineering, and business technology.';
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
-const POSTS_PER_PAGE = 12;
-
-// ==================================================
-// SEO METADATA
-// ==================================================
+const POSTS_PER_PAGE = 30;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-
   title: {
-    absolute: 'Bikram — Technology, Development & Business Insights',
+    absolute: 'Bikram Article — Software Development & Technology Blog by Bikram Khadka',
   },
-
   description: SITE_DESCRIPTION,
-
   applicationName: SITE_NAME,
-
+  authors: [{ name: AUTHOR_NAME, url: SITE_URL }],
+  generator: 'Next.js',
+  publisher: AUTHOR_NAME,
   keywords: [
-    'software development',
-    'technology',
-    'programming tutorials',
-    'Python tutorials',
-    'JavaScript tutorials',
-    'Next.js',
-    'web development',
-    'business technology',
-    'digital innovation',
+    'bikram article',
+    'bikram blog',
+    'bikram khadka',
+    'software engineering tutorials',
+    'Python programming',
+    'Next.js 16 development',
+    'web engineering',
+    'Turso SQLite blog',
+    'business technology innovation',
   ],
-
-  alternates: {
-    canonical: '/',
-  },
-
+  alternates: { canonical: '/' },
   openGraph: {
     type: 'website',
     url: '/',
     siteName: SITE_NAME,
-    title: 'Bikram — Technology, Development & Business Insights',
+    title: 'Bikram Article — Technology, Development & Business Insights',
     description: SITE_DESCRIPTION,
     locale: 'en_US',
   },
-
   twitter: {
     card: 'summary_large_image',
-    title: 'Bikram — Technology & Business',
+    title: 'Bikram Article — Bikram Khadka Tech Blog',
     description: SITE_DESCRIPTION,
-  },
-
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-      'max-video-preview': -1,
-    },
+    creator: '@bikramkhadka',
   },
 };
 
-// ==================================================
-// HELPERS
-// ==================================================
-
 function formatDate(date: string | Date) {
   const parsed = new Date(date);
-
-  if (Number.isNaN(parsed.getTime())) {
-    return 'Recently published';
-  }
-
+  if (Number.isNaN(parsed.getTime())) return 'Recently published';
   return new Intl.DateTimeFormat('en-US', {
     month: 'short',
     day: 'numeric',
@@ -95,10 +64,7 @@ function formatDate(date: string | Date) {
 
 function getISODate(date: string | Date) {
   const parsed = new Date(date);
-
-  return Number.isNaN(parsed.getTime())
-    ? undefined
-    : parsed.toISOString();
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed.toISOString();
 }
 
 function slugify(value: string) {
@@ -117,10 +83,6 @@ function safeJsonLd(data: object) {
   return JSON.stringify(data).replace(/</g, '\\u003c');
 }
 
-// ==================================================
-// DATABASE
-// ==================================================
-
 async function getPublishedPosts(): Promise<Post[]> {
   await initDb();
 
@@ -131,6 +93,7 @@ async function getPublishedPosts(): Promise<Post[]> {
       slug,
       excerpt,
       category,
+      tags,
       readingTime,
       views,
       "like",
@@ -141,12 +104,25 @@ async function getPublishedPosts(): Promise<Post[]> {
     LIMIT ${POSTS_PER_PAGE}`
   );
 
-  return result.rows as unknown as Post[];
+  return result.rows.map((row) => ({
+    id: Number(row.id),
+    title: String(row.title ?? ''),
+    slug: String(row.slug ?? ''),
+    excerpt: String(row.excerpt ?? ''),
+    content: '',
+    coverImage: row.coverImage ? String(row.coverImage) : null,
+    category: String(row.category ?? 'General'),
+    tags: String(row.tags ?? ''),
+    metaTitle: null,
+    metaDescription: null,
+    readingTime: Number(row.readingTime ?? 1),
+    published: 1,
+    views: Number(row.views ?? 0),
+    like: Number(row.like ?? 0),
+    createdAt: String(row.createdAt ?? ''),
+    updatedAt: String(row.updatedAt ?? row.createdAt ?? ''),
+  }));
 }
-
-// ==================================================
-// REUSABLE COMPONENTS
-// ==================================================
 
 function SectionHeading({
   eyebrow,
@@ -162,11 +138,9 @@ function SectionHeading({
       <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-blue-600">
         {eyebrow}
       </p>
-
       <h2 className="mt-3 text-3xl font-bold tracking-[-0.04em] text-neutral-950 sm:text-4xl">
         {title}
       </h2>
-
       {description && (
         <p className="mt-3 max-w-xl text-sm leading-7 text-neutral-500">
           {description}
@@ -194,20 +168,11 @@ function ArticleMeta({
       <span className="rounded-full bg-blue-50 px-3 py-1.5 font-bold uppercase tracking-wide text-blue-700">
         {category}
       </span>
-
-      <time
-        dateTime={getISODate(date)}
-        className="font-medium text-neutral-400"
-      >
+      <time dateTime={getISODate(date)} className="font-medium text-neutral-400">
         {formatDate(date)}
       </time>
-
       <span className="text-neutral-300">·</span>
-
-      <span className="font-medium text-neutral-400">
-        {readingTime} min read
-      </span>
-
+      <span className="font-medium text-neutral-400">{readingTime} min read</span>
       {(views !== undefined || likes !== undefined) && (
         <>
           <span className="text-neutral-300">·</span>
@@ -221,10 +186,6 @@ function ArticleMeta({
   );
 }
 
-// ==================================================
-// HERO
-// ==================================================
-
 function Hero() {
   return (
     <section className="relative overflow-hidden border-b border-neutral-200 bg-white">
@@ -235,7 +196,7 @@ function Hero() {
         <div className="max-w-4xl">
           <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-4 py-2 text-xs font-semibold text-blue-700">
             <span className="h-2 w-2 rounded-full bg-blue-600" />
-            Technology · Development · Business
+            Bikram Article · Software Engineering · Business Innovation
           </div>
 
           <h1 className="text-5xl font-black leading-[1.06] tracking-[-0.065em] text-neutral-950 sm:text-6xl lg:text-[76px]">
@@ -245,9 +206,7 @@ function Hero() {
           </h1>
 
           <p className="mt-8 max-w-2xl text-base leading-8 text-neutral-500 sm:text-lg">
-            Exploring software engineering, technology and smarter
-            business solutions. Practical tutorials, original ideas
-            and knowledge built through real-world experience.
+            Welcome to <strong className="font-semibold text-neutral-800">Bikram Article</strong>—the personal tech blog and engineering journal by <strong className="font-semibold text-neutral-800">Bikram Khadka</strong>. Exploring practical software architecture, web development, and smarter digital business solutions.
           </p>
 
           <div className="mt-10 flex flex-wrap items-center gap-4">
@@ -271,17 +230,13 @@ function Hero() {
 
         <div className="mt-20 flex flex-wrap gap-x-10 gap-y-4 border-t border-neutral-100 pt-7 text-[10px] font-bold uppercase tracking-[0.16em] text-neutral-400 sm:text-xs">
           <span>01 — Software Engineering</span>
-          <span>02 — Technology</span>
+          <span>02 — Technology &amp; Code</span>
           <span>03 — Business Innovation</span>
         </div>
       </div>
     </section>
   );
 }
-
-// ==================================================
-// FEATURED ARTICLE
-// ==================================================
 
 function FeaturedArticle({ post }: { post: Post }) {
   const category = post.category?.trim() || 'General';
@@ -296,7 +251,6 @@ function FeaturedArticle({ post }: { post: Post }) {
           eyebrow="Editor's selection"
           title="Featured article"
         />
-
         <span className="hidden text-[10px] font-bold tracking-[0.2em] text-neutral-300 sm:block">
           01 / FEATURED
         </span>
@@ -341,15 +295,11 @@ function FeaturedArticle({ post }: { post: Post }) {
             <span className="text-xs font-medium uppercase tracking-widest text-neutral-400">
               Reading time
             </span>
-
             <div className="mt-2">
               <span className="text-5xl font-black tracking-tight text-neutral-950">
                 {post.readingTime || 1}
               </span>
-
-              <span className="ml-2 text-sm text-neutral-400">
-                min read
-              </span>
+              <span className="ml-2 text-sm text-neutral-400">min read</span>
             </div>
           </div>
         </div>
@@ -358,15 +308,7 @@ function FeaturedArticle({ post }: { post: Post }) {
   );
 }
 
-// ==================================================
-// CATEGORY NAVIGATION
-// ==================================================
-
-function TopicNavigation({
-  categories,
-}: {
-  categories: string[];
-}) {
+function TopicNavigation({ categories }: { categories: string[] }) {
   if (!categories.length) return null;
 
   return (
@@ -377,7 +319,7 @@ function TopicNavigation({
       <SectionHeading
         eyebrow="Discover"
         title="Explore topics"
-        description="Find articles by subject and explore the topics that interest you."
+        description="Find articles by subject and explore the topics that interest you on Bikram Blog."
       />
 
       <div className="mt-7 flex flex-wrap gap-3">
@@ -395,115 +337,6 @@ function TopicNavigation({
   );
 }
 
-// ==================================================
-// ARTICLE CARD
-// ==================================================
-
-function ArticleCard({
-  post,
-  index,
-  anchorId,
-}: {
-  post: Post;
-  index: number;
-  anchorId?: string;
-}) {
-  const category = post.category?.trim() || 'General';
-
-  return (
-    <article
-      id={anchorId}
-      className="group flex min-h-[310px] flex-col rounded-2xl border border-neutral-200 bg-white p-6 transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl sm:p-7"
-    >
-      <div className="flex items-center justify-between gap-3">
-        <span className="rounded-lg bg-blue-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-blue-700">
-          {category}
-        </span>
-
-        <span className="text-xs font-medium text-neutral-300">
-          {String(index).padStart(2, '0')}
-        </span>
-      </div>
-
-      <div className="mt-7 flex-1">
-        <h3 className="text-xl font-bold leading-snug tracking-tight text-neutral-950 transition-colors group-hover:text-blue-600 sm:text-2xl">
-          <Link href={`/posts/${encodeURIComponent(post.slug)}`}>
-            {post.title}
-          </Link>
-        </h3>
-
-        <p className="mt-4 line-clamp-3 text-sm leading-7 text-neutral-500">
-          {post.excerpt || 'Read this article to discover useful insights and practical information.'}
-        </p>
-      </div>
-
-      {/* Live Views & Likes Badges */}
-      <div className="mt-6 flex items-center gap-3 text-xs font-mono text-neutral-500">
-        <span>👁️ {post.views ?? 0} views</span>
-        <span>·</span>
-        <span>❤️ {post.like ?? 0} likes</span>
-      </div>
-
-      <div className="mt-6 flex items-center justify-between border-t border-neutral-100 pt-5">
-        <div className="flex flex-col gap-1">
-          <time
-            dateTime={getISODate(post.createdAt)}
-            className="text-xs font-semibold text-neutral-700"
-          >
-            {formatDate(post.createdAt)}
-          </time>
-
-          <span className="text-[11px] text-neutral-400">
-            {post.readingTime || 1} min read
-          </span>
-        </div>
-
-        <Link
-          href={`/posts/${encodeURIComponent(post.slug)}`}
-          aria-label={`Read ${post.title}`}
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 text-lg transition group-hover:border-neutral-950 group-hover:bg-neutral-950 group-hover:text-white"
-        >
-          <span aria-hidden="true">↗</span>
-        </Link>
-      </div>
-    </article>
-  );
-}
-
-// ==================================================
-// EMPTY STATE
-// ==================================================
-
-function EmptyState() {
-  return (
-    <div className="rounded-[28px] border border-dashed border-neutral-300 bg-white px-6 py-20 text-center">
-      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-neutral-100 text-3xl">
-        ✍️
-      </div>
-
-      <h3 className="mt-6 text-xl font-bold">
-        Your story starts here.
-      </h3>
-
-      <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-neutral-500">
-        There are no published articles yet. Start creating useful
-        content and your articles will appear here.
-      </p>
-
-      <Link
-        href="/create"
-        className="mt-7 inline-flex rounded-xl bg-neutral-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-600"
-      >
-        Create your first article →
-      </Link>
-    </div>
-  );
-}
-
-// ==================================================
-// SEO STRUCTURED DATA
-// ==================================================
-
 function BlogStructuredData({ posts }: { posts: Post[] }) {
   const structuredData = {
     '@context': 'https://schema.org',
@@ -512,140 +345,43 @@ function BlogStructuredData({ posts }: { posts: Post[] }) {
     description: SITE_DESCRIPTION,
     url: SITE_URL,
     inLanguage: 'en',
-    author: {
-      '@type': 'Person',
-      name: 'Bikram',
-    },
+    author: { '@type': 'Person', name: AUTHOR_NAME, url: SITE_URL },
     blogPost: posts.map((post) => ({
       '@type': 'BlogPosting',
       headline: post.title,
       description: post.excerpt || SITE_DESCRIPTION,
       url: `${SITE_URL}/posts/${encodeURIComponent(post.slug)}`,
-      ...(getISODate(post.createdAt)
-        ? { datePublished: getISODate(post.createdAt) }
-        : {}),
-      author: {
-        '@type': 'Person',
-        name: 'Bikram',
-      },
-      ...(post.category
-        ? { articleSection: post.category }
-        : {}),
+      ...(getISODate(post.createdAt) ? { datePublished: getISODate(post.createdAt) } : {}),
+      author: { '@type': 'Person', name: AUTHOR_NAME },
+      ...(post.category ? { articleSection: post.category } : {}),
     })),
   };
 
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{
-        __html: safeJsonLd(structuredData),
-      }}
+      dangerouslySetInnerHTML={{ __html: safeJsonLd(structuredData) }}
     />
   );
 }
-
-// ==================================================
-// DATABASE CONTENT
-// ==================================================
 
 async function BlogContent() {
   const posts = await getPublishedPosts();
 
   const featuredPost = posts[0];
-  const latestPosts = posts.slice(1);
-
   const categories = Array.from(
-    new Set(
-      posts
-        .map((post) => post.category?.trim() || 'General')
-        .filter(Boolean)
-    )
+    new Set(posts.map((post) => post.category?.trim() || 'General').filter(Boolean))
   );
-
-  const featuredCategory =
-    featuredPost?.category?.trim() || 'General';
-
-  const anchorOwner = new Map<string, string>();
-
-  for (const category of categories) {
-    if (featuredPost && category === featuredCategory) {
-      anchorOwner.set(category, String(featuredPost.id));
-      continue;
-    }
-
-    const firstPost = latestPosts.find(
-      (post) => (post.category?.trim() || 'General') === category
-    );
-
-    if (firstPost) {
-      anchorOwner.set(category, String(firstPost.id));
-    }
-  }
 
   return (
     <>
       <BlogStructuredData posts={posts} />
-
-      {/* FEATURED ARTICLE */}
-      {featuredPost && (
-        <FeaturedArticle post={featuredPost} />
-      )}
-
-      {/* TOPICS */}
+      {featuredPost && <FeaturedArticle post={featuredPost} />}
       <TopicNavigation categories={categories} />
-
-      {/* LATEST ARTICLES */}
-      <section
-        id="articles"
-        className="mx-auto max-w-7xl scroll-mt-28 px-5 pb-24 pt-20 sm:px-8 lg:px-12"
-      >
-        <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
-          <SectionHeading
-            eyebrow="The journal"
-            title="Latest articles"
-            description="Fresh ideas, technical guides and practical knowledge."
-          />
-
-          <span className="text-xs font-semibold text-neutral-400">
-            {posts.length} {posts.length === 1 ? 'ARTICLE' : 'ARTICLES'}
-          </span>
-        </div>
-
-        {posts.length === 0 ? (
-          <EmptyState />
-        ) : latestPosts.length === 0 ? (
-          <div className="rounded-2xl border border-neutral-200 bg-white p-8 text-center">
-            <p className="text-sm text-neutral-500">
-              You have read the latest article. More articles are coming soon.
-            </p>
-          </div>
-        ) : (
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {latestPosts.map((post, index) => {
-              const category = post.category?.trim() || 'General';
-
-              const ownsAnchor =
-                anchorOwner.get(category) === String(post.id);
-
-              return (
-                <ArticleCard
-                  key={post.id}
-                  post={post}
-                  index={index + 2}
-                  anchorId={ownsAnchor ? categoryId(category) : undefined}
-                />
-              );
-            })}
-          </div>
-        )}
-      </section>
+      <ArticleExplorer posts={posts} />
     </>
   );
 }
-
-// ==================================================
-// SUSPENSE FALLBACK
-// ==================================================
 
 function BlogLoading() {
   return (
@@ -654,41 +390,15 @@ function BlogLoading() {
         <div className="h-5 w-32 rounded-full bg-neutral-100" />
         <div className="mt-8 h-10 max-w-2xl rounded-lg bg-neutral-100" />
         <div className="mt-4 h-5 max-w-xl rounded-lg bg-neutral-100" />
-        <div className="mt-4 h-5 max-w-md rounded-lg bg-neutral-100" />
-        <div className="mt-9 h-5 w-40 rounded-lg bg-neutral-100" />
-      </div>
-
-      <div>
-        <div className="h-8 w-52 animate-pulse rounded-lg bg-neutral-100" />
-
-        <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div
-              key={index}
-              className="min-h-[290px] animate-pulse rounded-2xl border border-neutral-200 bg-white p-7"
-            >
-              <div className="h-6 w-24 rounded-full bg-neutral-100" />
-              <div className="mt-9 h-7 w-full rounded-lg bg-neutral-100" />
-              <div className="mt-4 h-5 w-4/5 rounded-lg bg-neutral-100" />
-              <div className="mt-4 h-5 w-3/5 rounded-lg bg-neutral-100" />
-              <div className="mt-12 h-8 w-full rounded-lg bg-neutral-100" />
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );
 }
 
-// ==================================================
-// MAIN PAGE
-// ==================================================
-
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-[#fafafa] text-neutral-900">
       <Hero />
-
       <Suspense fallback={<BlogLoading />}>
         <BlogContent />
       </Suspense>
