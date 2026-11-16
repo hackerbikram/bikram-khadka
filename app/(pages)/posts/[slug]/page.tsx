@@ -179,6 +179,9 @@ export default async function PostPage({ params }: PageProps) {
     url: canonicalUrl,
   };
 
+  // Check if content contains raw HTML tags (e.g. <div, <p, <span, <section)
+  const isHtmlContent = /<\/?[a-z][\s\S]*>/i.test(post.content);
+
   return (
     <article className="mx-auto max-w-3xl px-5 py-12 sm:px-6">
       {/* XSS-Safe Structured Data */}
@@ -249,9 +252,13 @@ export default async function PostPage({ params }: PageProps) {
         </figure>
       )}
 
-      {/* Markdown Body */}
+      {/* Article Content Body (Renders Markdown or Custom Styled HTML automatically) */}
       <div className="prose prose-neutral prose-lg max-w-none prose-headings:font-bold prose-a:text-blue-600 prose-img:rounded-xl">
-        <ReactMarkdown>{post.content}</ReactMarkdown>
+        {isHtmlContent ? (
+          <div dangerouslySetInnerHTML={{ __html: post.content }} />
+        ) : (
+          <ReactMarkdown>{post.content}</ReactMarkdown>
+        )}
       </div>
 
       {/* Like Button Section */}
