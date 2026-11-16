@@ -15,6 +15,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Featured', href: '/#featured', hash: '#featured' },
   { label: 'Articles', href: '/#articles', hash: '#articles' },
   { label: 'Topics', href: '/#topics', hash: '#topics' },
+  {label: 'About',href: '/about'},
 ];
 
 export default function NavBar() {
