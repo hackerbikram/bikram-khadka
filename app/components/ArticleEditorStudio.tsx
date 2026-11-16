@@ -1,11 +1,12 @@
 'use client';
-
+import Link from 'next/link';
 import { useState, useMemo } from 'react';
 
 interface ArticleEditorStudioProps {
   initialTitle?: string;
   initialContent?: string;
   initialExcerpt?: string;
+  saveAction: (formData: FormData) => Promise<void>;
 }
 
 const PREDEFINED_CATEGORIES = ['Engineering', 'Next.js', 'Python', 'Business', 'Design'];
@@ -14,20 +15,21 @@ export default function ArticleEditorStudio({
   initialTitle = '',
   initialContent = '',
   initialExcerpt = '',
+  saveAction,
 }: ArticleEditorStudioProps) {
   const [title, setTitle] = useState(initialTitle);
   const [excerpt, setExcerpt] = useState(initialExcerpt);
   const [content, setContent] = useState(initialContent);
   const [tags, setTags] = useState('nextjs, design, css');
+  const [slug, setSlug] = useState('');
 
   // Category Selection States
   const [selectedCategoryOption, setSelectedCategoryOption] = useState<string>('Engineering');
   const [customCategoryInput, setCustomCategoryInput] = useState<string>('');
 
-  // Resolved final category value
   const category = selectedCategoryOption === 'Other' ? (customCategoryInput.trim() || 'General') : selectedCategoryOption;
 
-  // Content Mode Toggle ('simple' vs 'html')
+  // Content Mode Toggle
   const [contentMode, setContentMode] = useState<'simple' | 'html'>('simple');
 
   // Live Style Customization States
@@ -37,7 +39,6 @@ export default function ArticleEditorStudio({
   const [customCss, setCustomCss] = useState<string>('/* Add custom CSS styles here */\nh2 { letter-spacing: -0.03em; }');
   const [activeTab, setActiveTab] = useState<'edit' | 'preview' | 'split'>('split');
 
-  // Dynamic CSS mappings
   const fontClass = {
     sans: 'font-sans',
     serif: 'font-serif',
@@ -57,16 +58,13 @@ export default function ArticleEditorStudio({
     amber: '#d97706',
   }[accentColor];
 
-  // Render processed content based on active mode
   const renderedContentHtml = useMemo(() => {
     if (!content) return '<p class="text-neutral-400">Start typing content to see live preview...</p>';
 
     if (contentMode === 'html') {
-      // Raw HTML mode: render exact markup as typed
       return content;
     }
 
-    // Simple markdown / text mode
     return content
       .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold">$1</h1>')
       .replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold mt-4">$1</h2>')
@@ -77,7 +75,10 @@ export default function ArticleEditorStudio({
   }, [content, contentMode]);
 
   return (
-    <div className="space-y-6">
+    <form action={saveAction} className="space-y-6">
+      {/* Hidden inputs to pass state values into Server Action form data */}
+      <input type="hidden" name="category" value={category} />
+
       {/* Studio Toolbar */}
       <div className="sticky top-4 z-20 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-neutral-200 bg-white/90 p-4 shadow-sm backdrop-blur-md">
         <div className="flex items-center gap-2">
@@ -118,7 +119,7 @@ export default function ArticleEditorStudio({
           <select
             value={fontFamily}
             onChange={(e) => setFontFamily(e.target.value as any)}
-            className="rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-xs font-semibold text-neutral-700 focus:outline-none"
+            className="rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-xs font-semibold text-neutral-700 focus:outline-none cursor-pointer"
           >
             <option value="sans">Sans Font</option>
             <option value="serif">Serif Font</option>
@@ -128,7 +129,7 @@ export default function ArticleEditorStudio({
           <select
             value={fontSize}
             onChange={(e) => setFontSize(e.target.value as any)}
-            className="rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-xs font-semibold text-neutral-700 focus:outline-none"
+            className="rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-xs font-semibold text-neutral-700 focus:outline-none cursor-pointer"
           >
             <option value="sm">Small Text</option>
             <option value="base">Normal Text</option>
@@ -141,7 +142,7 @@ export default function ArticleEditorStudio({
                 key={color}
                 type="button"
                 onClick={() => setAccentColor(color)}
-                className={`h-5 w-5 rounded-full border-2 transition ${
+                className={`h-5 w-5 rounded-full border-2 transition cursor-pointer ${
                   accentColor === color ? 'border-neutral-950 scale-110' : 'border-transparent'
                 }`}
                 style={{
@@ -166,8 +167,12 @@ export default function ArticleEditorStudio({
             <h2 className="text-sm font-bold uppercase tracking-wider text-neutral-400">Content &amp; HTML Editor</h2>
 
             <div>
-              <label className="block text-xs font-semibold text-neutral-600 mb-1">Title</label>
+              <label className="block text-xs font-semibold text-neutral-600 mb-1">
+                Article Title <span className="text-red-500">*</span>
+              </label>
               <input
+                name="title"
+                required
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Article title..."
@@ -175,14 +180,13 @@ export default function ArticleEditorStudio({
               />
             </div>
 
-            {/* Category Dropdown & 'Other' conditional input */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-neutral-600 mb-1">Category</label>
                 <select
                   value={selectedCategoryOption}
                   onChange={(e) => setSelectedCategoryOption(e.target.value)}
-                  className="w-full rounded-xl border border-neutral-300 bg-neutral-50 px-4 py-2.5 text-sm text-neutral-900 focus:outline-none"
+                  className="w-full rounded-xl border border-neutral-300 bg-neutral-50 px-4 py-2.5 text-sm text-neutral-900 focus:outline-none cursor-pointer"
                 >
                   {PREDEFINED_CATEGORIES.map((cat) => (
                     <option key={cat} value={cat}>
@@ -192,14 +196,13 @@ export default function ArticleEditorStudio({
                   <option value="Other">Other (Custom)...</option>
                 </select>
 
-                {/* Show text input when 'Other' is selected */}
                 {selectedCategoryOption === 'Other' && (
                   <input
                     type="text"
                     value={customCategoryInput}
                     onChange={(e) => setCustomCategoryInput(e.target.value)}
                     placeholder="Enter custom category..."
-                    className="mt-2 w-full rounded-xl border border-neutral-300 bg-white px-4 py-2 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900 animate-fadeIn"
+                    className="mt-2 w-full rounded-xl border border-neutral-300 bg-white px-4 py-2 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900"
                   />
                 )}
               </div>
@@ -207,34 +210,51 @@ export default function ArticleEditorStudio({
               <div>
                 <label className="block text-xs font-semibold text-neutral-600 mb-1">Tags</label>
                 <input
+                  name="tags"
                   value={tags}
                   onChange={(e) => setTags(e.target.value)}
+                  placeholder="nextjs, design, css"
                   className="w-full rounded-xl border border-neutral-300 bg-neutral-50 px-4 py-2.5 text-sm text-neutral-900 focus:outline-none"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-neutral-600 mb-1">Excerpt</label>
+              <label className="block text-xs font-semibold text-neutral-600 mb-1">Custom Slug <span className="text-neutral-400 font-normal">(Optional)</span></label>
+              <input
+                name="slug"
+                value={slug}
+                onChange={(e) => setSlug(e.target.value)}
+                placeholder="auto-generated-from-title-if-blank"
+                className="w-full rounded-xl border border-neutral-300 bg-neutral-50 px-4 py-2.5 font-mono text-xs text-neutral-900 focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-neutral-600 mb-1">
+                Excerpt / Summary <span className="text-red-500">*</span>
+              </label>
               <textarea
+                name="excerpt"
+                required
                 value={excerpt}
                 onChange={(e) => setExcerpt(e.target.value)}
                 rows={2}
+                placeholder="A brief 1-2 sentence overview..."
                 className="w-full rounded-xl border border-neutral-300 bg-neutral-50 px-4 py-2.5 text-sm text-neutral-900 focus:outline-none resize-none"
               />
             </div>
 
-            {/* Content Mode Toggle & Textarea */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="block text-xs font-semibold text-neutral-600">
-                  Content Editor
+                  Content Editor <span className="text-red-500">*</span>
                 </label>
                 <div className="flex rounded-lg bg-neutral-100 p-0.5">
                   <button
                     type="button"
                     onClick={() => setContentMode('simple')}
-                    className={`rounded-md px-3 py-1 text-[11px] font-semibold transition ${
+                    className={`rounded-md px-3 py-1 text-[11px] font-semibold transition cursor-pointer ${
                       contentMode === 'simple' ? 'bg-white text-neutral-950 shadow-xs' : 'text-neutral-500 hover:text-neutral-900'
                     }`}
                   >
@@ -243,7 +263,7 @@ export default function ArticleEditorStudio({
                   <button
                     type="button"
                     onClick={() => setContentMode('html')}
-                    className={`rounded-md px-3 py-1 text-[11px] font-semibold transition ${
+                    className={`rounded-md px-3 py-1 text-[11px] font-semibold transition cursor-pointer ${
                       contentMode === 'html' ? 'bg-white text-neutral-950 shadow-xs' : 'text-neutral-500 hover:text-neutral-900'
                     }`}
                   >
@@ -253,14 +273,12 @@ export default function ArticleEditorStudio({
               </div>
 
               <textarea
+                name="content"
+                required
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 rows={12}
-                placeholder={
-                  contentMode === 'html'
-                    ? '<div class="p-6 bg-blue-50 rounded-2xl border border-blue-200">\n  <h3 class="text-lg font-bold text-blue-900">Custom HTML Block</h3>\n  <p class="text-blue-700">Write custom styled HTML here...</p>\n</div>'
-                    : '## Introduction\n\nWrite your markdown content here...'
-                }
+                placeholder="Write your article content here..."
                 className="w-full rounded-xl border border-neutral-300 bg-neutral-50 p-4 font-mono text-xs text-neutral-900 focus:outline-none"
               />
             </div>
@@ -271,7 +289,6 @@ export default function ArticleEditorStudio({
                 value={customCss}
                 onChange={(e) => setCustomCss(e.target.value)}
                 rows={4}
-                placeholder="/* Add CSS rules to test styles live */"
                 className="w-full rounded-xl border border-neutral-300 bg-neutral-900 p-4 font-mono text-xs text-emerald-400 focus:outline-none"
               />
             </div>
@@ -288,7 +305,6 @@ export default function ArticleEditorStudio({
               </span>
             </div>
 
-            {/* Injected Custom CSS for live preview */}
             <style dangerouslySetInnerHTML={{ __html: customCss }} />
 
             <article className={`space-y-6 ${fontClass} ${sizeClass} text-neutral-800`}>
@@ -305,7 +321,6 @@ export default function ArticleEditorStudio({
                 </p>
               )}
 
-              {/* Live Rendered Content */}
               <div
                 className="prose prose-neutral max-w-none pt-4 space-y-4"
                 dangerouslySetInnerHTML={{ __html: renderedContentHtml }}
@@ -314,6 +329,22 @@ export default function ArticleEditorStudio({
           </div>
         )}
       </div>
-    </div>
+
+      {/* Finalize & Publish Bar */}
+      <div className="flex items-center justify-between rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+        <Link
+          href="/"
+          className="text-sm font-semibold text-neutral-600 hover:text-neutral-900"
+        >
+          Cancel &amp; Return Home
+        </Link>
+        <button
+          type="submit"
+          className="rounded-xl bg-neutral-950 px-8 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-blue-600 active:scale-[0.99] cursor-pointer"
+        >
+          Publish Article 🚀
+        </button>
+      </div>
+    </form>
   );
 }
