@@ -3,7 +3,6 @@
 import { db, initDb } from '@/app/lib/db';
 import { cookies } from 'next/headers';
 import crypto from 'crypto';
-import { error } from 'console';
 
 let isTableInitialized = false;
 async function ensureTable() {
@@ -30,12 +29,17 @@ async function getVisitorToken(): Promise<string> {
 
   if (!visitorToken) {
     visitorToken = crypto.randomUUID();
-    cookieStore.set('visitor_token', visitorToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 24 * 365,
-      path: '/',
-    });
+    try {
+      cookieStore.set('visitor_token', visitorToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 60 * 24 * 365,
+        path: '/',
+        sameSite: 'lax',
+      });
+    } catch (err) {
+      // Prevents crash when called during read-only Server Component rendering phases
+    }
   }
   return visitorToken;
 }
@@ -62,7 +66,8 @@ export async function toggleLike(postId: string): Promise<{ totalLikes: number; 
     });
   }
 
-  return await getEngagementStats(stringPostId);
+  const stats = await getEngagementStats(stringPostId);
+  return { totalLikes: stats.totalLikes, userLiked: stats.userLiked };
 }
 
 export async function getEngagementStats(postId: string): Promise<{ totalLikes: number; userLiked: boolean; views: number }> {
