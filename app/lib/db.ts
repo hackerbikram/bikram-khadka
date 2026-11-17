@@ -25,7 +25,7 @@ export interface Post {
   readingTime: number;
   published: number;
   views: number;
-  like: number;
+  like:number;
   createdAt: string;
   updatedAt: string;
 }
@@ -45,7 +45,7 @@ export async function createUserTable() {
 export async function initDb() {
   if (dbInitialized) return;
 
-  // 1. Create posts table if it doesn't exist
+  // 1. Create posts table if it doesn't exist (without like column)
   await db.execute(`
     CREATE TABLE IF NOT EXISTS posts (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -61,7 +61,6 @@ export async function initDb() {
       readingTime INTEGER DEFAULT 1,
       published INTEGER DEFAULT 1,
       views INTEGER DEFAULT 0,
-      "like" INTEGER DEFAULT 0,
       createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
       updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
     )
@@ -70,13 +69,9 @@ export async function initDb() {
   // 2. Create users table
   await createUserTable();
 
-  // 3. Safe auto-migration: Add columns if an older database table already exists without them
+  // 3. Safe auto-migration: Add views column if an older database table already exists without it
   try {
     await db.execute(`ALTER TABLE posts ADD COLUMN views INTEGER DEFAULT 0`);
-  } catch {}
-
-  try {
-    await db.execute(`ALTER TABLE posts ADD COLUMN "like" INTEGER DEFAULT 0`);
   } catch {}
 
   await db.execute(`CREATE INDEX IF NOT EXISTS idx_posts_slug ON posts(slug)`);

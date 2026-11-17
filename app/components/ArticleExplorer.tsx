@@ -4,6 +4,7 @@ import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import type { Post } from '@/app/lib/db';
+import { getLike } from '../actions/engagementAction';
 
 interface ArticleExplorerProps {
   posts: Post[];
@@ -17,6 +18,95 @@ function formatDate(date: string | Date) {
     day: 'numeric',
     year: 'numeric',
   }).format(parsed);
+}
+
+/**
+ * Isolated Card component to fetch and display real-time like counts per post
+ */
+function ArticleCard({ post, index, onTagClick }: { post: Post; index: number; onTagClick: (tag: string) => void }) {
+  const [likes, setLikes] = useState<number>(post.like ?? 0);
+
+  useEffect(() => {
+    let isMounted = true;
+    getLike(String(post.id)).then((count) => {
+      if (isMounted) setLikes(count);
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [post.id]);
+
+  const category = post.category?.trim() || 'General';
+  const postTags = post.tags
+    ? post.tags.split(',').map((t) => t.trim()).filter(Boolean).slice(0, 3)
+    : [];
+
+  return (
+    <article
+      className="group flex min-h-[310px] flex-col rounded-2xl border border-neutral-200 bg-white p-6 transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl sm:p-7"
+    >
+      <div className="flex items-center justify-between gap-3">
+        <span className="rounded-lg bg-blue-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-blue-700">
+          {category}
+        </span>
+        <span className="text-xs font-medium text-neutral-300">
+          {String(index + 1).padStart(2, '0')}
+        </span>
+      </div>
+
+      <div className="mt-6 flex-1">
+        <h3 className="text-xl font-bold leading-snug tracking-tight text-neutral-950 transition-colors group-hover:text-blue-600 sm:text-2xl">
+          <Link href={`/posts/${encodeURIComponent(post.slug)}`}>
+            {post.title}
+          </Link>
+        </h3>
+
+        <p className="mt-3 line-clamp-3 text-sm leading-7 text-neutral-500">
+          {post.excerpt}
+        </p>
+      </div>
+
+      {postTags.length > 0 && (
+        <div className="mt-4 flex flex-wrap gap-1.5">
+          {postTags.map((tag) => (
+            <button
+              key={tag}
+              type="button"
+              onClick={() => onTagClick(tag)}
+              className="rounded-md bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-neutral-600 transition hover:bg-blue-50 hover:text-blue-700 cursor-pointer"
+            >
+              #{tag}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="mt-5 flex items-center gap-3 font-mono text-xs text-neutral-500">
+        <span>👁️ {post.views ?? 0} views</span>
+        <span>·</span>
+        <span>❤️ {likes} likes</span>
+      </div>
+
+      <div className="mt-5 flex items-center justify-between border-t border-neutral-100 pt-4">
+        <div className="flex flex-col gap-0.5">
+          <time className="text-xs font-semibold text-neutral-700">
+            {formatDate(post.createdAt)}
+          </time>
+          <span className="text-[11px] text-neutral-400">
+            {post.readingTime || 1} min read
+          </span>
+        </div>
+
+        <Link
+          href={`/posts/${encodeURIComponent(post.slug)}`}
+          aria-label={`Read ${post.title}`}
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 text-lg transition group-hover:border-neutral-950 group-hover:bg-neutral-950 group-hover:text-white"
+        >
+          <span aria-hidden="true">↗</span>
+        </Link>
+      </div>
+    </article>
+  );
 }
 
 export default function ArticleExplorer({ posts }: ArticleExplorerProps) {
@@ -208,80 +298,14 @@ export default function ArticleExplorer({ posts }: ArticleExplorerProps) {
         </div>
       ) : (
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {filteredPosts.map((post, index) => {
-            const category = post.category?.trim() || 'General';
-            const postTags = post.tags
-              ? post.tags.split(',').map((t) => t.trim()).filter(Boolean).slice(0, 3)
-              : [];
-
-            return (
-              <article
-                key={post.id}
-                className="group flex min-h-[310px] flex-col rounded-2xl border border-neutral-200 bg-white p-6 transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl sm:p-7"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <span className="rounded-lg bg-blue-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-blue-700">
-                    {category}
-                  </span>
-                  <span className="text-xs font-medium text-neutral-300">
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
-                </div>
-
-                <div className="mt-6 flex-1">
-                  <h3 className="text-xl font-bold leading-snug tracking-tight text-neutral-950 transition-colors group-hover:text-blue-600 sm:text-2xl">
-                    <Link href={`/posts/${encodeURIComponent(post.slug)}`}>
-                      {post.title}
-                    </Link>
-                  </h3>
-
-                  <p className="mt-3 line-clamp-3 text-sm leading-7 text-neutral-500">
-                    {post.excerpt}
-                  </p>
-                </div>
-
-                {postTags.length > 0 && (
-                  <div className="mt-4 flex flex-wrap gap-1.5">
-                    {postTags.map((tag) => (
-                      <button
-                        key={tag}
-                        type="button"
-                        onClick={() => setQuery(tag)}
-                        className="rounded-md bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-neutral-600 transition hover:bg-blue-50 hover:text-blue-700 cursor-pointer"
-                      >
-                        #{tag}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                <div className="mt-5 flex items-center gap-3 font-mono text-xs text-neutral-500">
-                  <span>👁️ {post.views ?? 0} views</span>
-                  <span>·</span>
-                  <span>❤️ {post.like ?? 0} likes</span>
-                </div>
-
-                <div className="mt-5 flex items-center justify-between border-t border-neutral-100 pt-4">
-                  <div className="flex flex-col gap-0.5">
-                    <time className="text-xs font-semibold text-neutral-700">
-                      {formatDate(post.createdAt)}
-                    </time>
-                    <span className="text-[11px] text-neutral-400">
-                      {post.readingTime || 1} min read
-                    </span>
-                  </div>
-
-                  <Link
-                    href={`/posts/${encodeURIComponent(post.slug)}`}
-                    aria-label={`Read ${post.title}`}
-                    className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 text-lg transition group-hover:border-neutral-950 group-hover:bg-neutral-950 group-hover:text-white"
-                  >
-                    <span aria-hidden="true">↗</span>
-                  </Link>
-                </div>
-              </article>
-            );
-          })}
+          {filteredPosts.map((post, index) => (
+            <ArticleCard
+              key={post.id}
+              post={post}
+              index={index}
+              onTagClick={(tag) => setQuery(tag)}
+            />
+          ))}
         </div>
       )}
     </section>

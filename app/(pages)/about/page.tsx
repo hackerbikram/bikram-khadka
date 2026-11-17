@@ -1,3 +1,6 @@
+'use client'; // Note: Client directive required for stateful image zoom modal
+
+import { useState } from 'react';
 import DateUI from '@/app/components/DateUI';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -6,22 +9,10 @@ const SITE_NAME = 'Bikram Article';
 const AUTHOR_NAME = 'Bikram Khadka';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://bikram-khadka.vercel.app';
 
-export const metadata: Metadata = {
-  title: `About ${AUTHOR_NAME} — Software Engineer & Creator`,
-  description: `Learn more about Bikram Khadka (Bikram Khadka / Bikram Article) — software engineering student in Kobe, Japan, full-stack developer, and creator.`,
-  alternates: {
-    canonical: `${SITE_URL}/about`,
-  },
-  openGraph: {
-    title: `About ${AUTHOR_NAME} — Software Engineer & Creator`,
-    description: `Official bio of Bikram Khadka. Discover his background in software engineering, tech stack, and projects.`,
-    url: `${SITE_URL}/about`,
-    type: 'profile',
-  },
-};
-
 export default function AboutPage() {
-  // Schema.org Person markup to help Google associate your name with your social profiles
+  const [isPhotoOpen, setIsPhotoOpen] = useState(false);
+
+  // Schema.org Person markup
   const personJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Person',
@@ -38,7 +29,7 @@ export default function AboutPage() {
     },
     sameAs: [
       'https://github.com/hakerbikram',
-      'https://www.linkedin.com/in/dhurba-khadka-1a5b51357?utm_source=share_via&utm_content=profile&utm_medium=member_ios',
+      'https://www.linkedin.com/in/dhurba-khadka-1a5b51357',
       'https://www.facebook.com/share/1BjMx25tg9/?mibextid=wwXIfr',
       'https://www.tiktok.com/@dhurba..khadka?_r=1&_t=ZS-9BRgrec1EoL',
     ],
@@ -65,14 +56,23 @@ export default function AboutPage() {
 
         {/* Header Profile Section */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 border-b border-neutral-200 pb-10">
-          <div className="relative h-24 w-24 overflow-hidden rounded-2xl bg-neutral-950 shadow-md flex items-center justify-center">
-            {/* Fallback initials displayed behind in case image fails to load */}
-            <span className="absolute text-2xl font-black text-white">BK</span>
-            <img
-              src="https://www.facebook.com/share/1E5gYjdHyt/?mibextid=wwXIfr" 
-              alt="Bikram Khadka"
-              className="relative z-10 h-full w-full object-cover"
-            />
+          <div className="relative group">
+            <div className="relative h-28 w-28 overflow-hidden rounded-2xl bg-neutral-950 shadow-md flex items-center justify-center border-2 border-neutral-200">
+              <span className="absolute text-2xl font-black text-white">BK</span>
+              <img
+                src="/bikram_khadka.jpeg" 
+                alt="Bikram Khadka"
+                className="relative z-10 h-full w-full object-cover"
+              />
+            </div>
+            {/* View Full Size Button Overlay */}
+            <button
+              type="button"
+              onClick={() => setIsPhotoOpen(true)}
+              className="absolute inset-0 z-20 flex items-center justify-center bg-black/40 opacity-0 transition group-hover:opacity-100 rounded-2xl text-white text-xs font-bold cursor-pointer"
+            >
+              🔍 View Full
+            </button>
           </div>
 
           <div>
@@ -83,7 +83,7 @@ export default function AboutPage() {
               Bikram Khadka
             </h1>
             <p className="mt-1 text-sm font-medium text-neutral-500">
-              Also known as <strong className="text-neutral-800">Bikram Article</strong> · Living &amp; studying in Kobe, Japan
+              Also known as <strong className="text-neutral-800">Bikram Article</strong> · Living &amp; studying in Kobe, Hyogo, Japan
             </p>
           </div>
         </div>
@@ -91,17 +91,17 @@ export default function AboutPage() {
         {/* Bio Body Content */}
         <div className="prose prose-neutral prose-lg mt-10 max-w-none space-y-6 text-neutral-600 leading-relaxed">
           <p>
-            Hello! I am <strong className="text-neutral-900">Bikram Khadka</strong>, a passionate full-stack software developer, digital creator, and technology enthusiast. Currently based in <strong className="text-neutral-900">Kobe, Hyogo, Japan</strong>, I am studying digital transformation and advanced software development at Art College Kobe.
+            Hello! I am <strong className="text-neutral-900">Dhurba Bikram Khadka</strong> (known professionally as <strong className="text-neutral-900">Bikram Khadka</strong>), a passionate full-stack software engineer, backend developer, and digital creator. Currently based in <strong className="text-neutral-900">Kobe, Japan</strong>, I study in the DX Business Course at <strong className="text-neutral-900">Art College Kobe</strong>, focusing on scalable software architecture and digital business operations.
           </p>
 
-          <h2 className="text-xl font-bold text-neutral-950 pt-4">Background &amp; Expertise</h2>
+          <h2 className="text-xl font-bold text-neutral-950 pt-4">Engineering Philosophy &amp; Tech Stack</h2>
           <p>
-            My engineering philosophy centers around building fast, lightweight, and practical software solutions that solve real-world operational problems. I specialize in backend architecture and full-stack web applications using modern tools like Python, FastAPI, Django, Next.js, TypeScript, and SQLite (Turso).
+            My work centers on building high-performance, lightweight, and practical web applications. I specialize in modern backend and full-stack toolchains using Python (FastAPI, Django), TypeScript (Next.js, React), Java, and SQLite/PostgreSQL databases. I advocate for clean code, local-first workflows, and reliable system performance.
           </p>
 
           <h2 className="text-xl font-bold text-neutral-950 pt-4">About Bikram Article</h2>
           <p>
-            <strong className="text-neutral-900">Bikram Article</strong> is my personal technical journal and knowledge base. Here, I document programming tutorials, web engineering guides, and business technology insights gained through hands-on development and real-world projects.
+            <strong className="text-neutral-900">Bikram Article</strong> serves as my personal technical journal and knowledge hub. Here, I publish in-depth programming guides, architecture case studies, and engineering tutorials born from my hands-on development projects in Japan and Nepal.
           </p>
 
           {/* Social Links & Official IDs */}
@@ -112,7 +112,7 @@ export default function AboutPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 not-prose pt-2">
             <a
-              href="https://github.com/bikramkhadka"
+              href="https://github.com/hakerbikram"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-3 rounded-xl border border-neutral-200 bg-white p-4 transition hover:border-blue-300 hover:shadow-sm"
@@ -120,12 +120,12 @@ export default function AboutPage() {
               <span className="text-xl">💻</span>
               <div>
                 <span className="block text-xs font-bold uppercase tracking-wider text-neutral-400">GitHub</span>
-                <span className="text-sm font-bold text-neutral-900">@bikramkhadka</span>
+                <span className="text-sm font-bold text-neutral-900">@hakerbikram</span>
               </div>
             </a>
 
             <a
-              href="https://linkedin.com/in/bikramkhadka"
+              href="https://www.linkedin.com/in/dhurba-khadka-1a5b51357"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-3 rounded-xl border border-neutral-200 bg-white p-4 transition hover:border-blue-300 hover:shadow-sm"
@@ -133,46 +133,80 @@ export default function AboutPage() {
               <span className="text-xl">💼</span>
               <div>
                 <span className="block text-xs font-bold uppercase tracking-wider text-neutral-400">LinkedIn</span>
-                <span className="text-sm font-bold text-neutral-900">Bikram Khadka</span>
+                <span className="text-sm font-bold text-neutral-900">Dhurba Bikram Khadka</span>
               </div>
             </a>
 
             <a
-              href="https://www.facebook.com/bikramkhadka"
+              href="https://www.facebook.com/share/1BjMx25tg9/?mibextid=wwXIfr"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-3 rounded-xl border border-neutral-200 bg-white p-4 transition hover:border-blue-300 hover:shadow-sm"
             >
               <span className="text-xl">📘</span>
               <div>
-                <span className="block text-xs font-bold uppercase tracking-wider text-neutral-400">Facebook ID</span>
-                <span className="text-sm font-bold text-neutral-900">facebook.com/bikramkhadka</span>
+                <span className="block text-xs font-bold uppercase tracking-wider text-neutral-400">Facebook</span>
+                <span className="text-sm font-bold text-neutral-900">Official Profile</span>
               </div>
             </a>
 
             <a
-              href="https://www.tiktok.com/@bikramkhadka"
+              href="https://www.tiktok.com/@dhurba..khadka?_r=1&_t=ZS-9BRgrec1EoL"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-3 rounded-xl border border-neutral-200 bg-white p-4 transition hover:border-blue-300 hover:shadow-sm"
             >
               <span className="text-xl">🎵</span>
               <div>
-                <span className="block text-xs font-bold uppercase tracking-wider text-neutral-400">TikTok ID</span>
-                <span className="text-sm font-bold text-neutral-900">@bikramkhadka</span>
+                <span className="block text-xs font-bold uppercase tracking-wider text-neutral-400">TikTok</span>
+                <span className="text-sm font-bold text-neutral-900">@dhurba..khadka</span>
               </div>
             </a>
           </div>
         </div>
 
+        {/* Legal & Policy Navigation Links */}
+        <div className="mt-12 flex flex-wrap items-center gap-6 border-t border-neutral-200 pt-6 text-xs font-medium text-neutral-500">
+          <Link href="/privacy" className="hover:text-blue-600 transition">Privacy Policy</Link>
+          <span>•</span>
+          <Link href="/terms" className="hover:text-blue-600 transition">Terms &amp; Guidelines</Link>
+          <span>•</span>
+          <Link href="/contact" className="hover:text-blue-600 transition">Contact &amp; Inquiries</Link>
+        </div>
+
         {/* Footer Call to Action */}
-        <div className="mt-16 border-t border-neutral-200 pt-8 flex items-center justify-between text-xs text-neutral-400">
+        <div className="mt-6 border-t border-neutral-200 pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-400 gap-4">
           <span>© <DateUI /> Bikram Khadka. All rights reserved.</span>
           <Link href="/" className="font-semibold text-neutral-900 hover:underline">
             Explore Articles →
           </Link>
         </div>
       </div>
+
+      {/* Full Size Photo Modal */}
+      {isPhotoOpen && (
+        <div 
+          onClick={() => setIsPhotoOpen(false)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+        >
+          <div className="relative max-w-lg w-full bg-white rounded-3xl overflow-hidden shadow-2xl p-4 text-center">
+            <button
+              type="button"
+              onClick={() => setIsPhotoOpen(false)}
+              className="absolute top-4 right-4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-neutral-900 text-white text-xs font-bold shadow hover:bg-neutral-700"
+            >
+              ✕
+            </button>
+            <img
+              src="/bikram_khadka.jpeg"
+              alt="Bikram Khadka Full Size"
+              className="w-full max-h-[75vh] object-contain rounded-2xl mx-auto"
+            />
+            <p className="mt-3 text-sm font-bold text-neutral-900">Bikram Khadka</p>
+            <p className="text-xs text-neutral-500">Kobe, Japan</p>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

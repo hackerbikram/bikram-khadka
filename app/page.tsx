@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { db, initDb, type Post } from '@/app/lib/db';
 import type { Metadata } from 'next';
 import ArticleExplorer from '@/app/components/ArticleExplorer';
+import { getLike } from '@/app/actions/engagementAction';
 
 const SITE_NAME = 'Bikram Article';
 const AUTHOR_NAME = 'Bikram Khadka';
@@ -10,8 +11,7 @@ const SITE_DESCRIPTION =
   'Official blog and technical journal by Bikram Khadka (Bikram Article). Explore practical tutorials on software development, Python, Next.js, web engineering, and business technology.';
 
 const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-
+  process.env.NEXT_PUBLIC_SITE_URL || 'https://bikram-khadka.vercel.app';
 const POSTS_PER_PAGE = 30;
 
 export const metadata: Metadata = {
@@ -96,7 +96,6 @@ async function getPublishedPosts(): Promise<Post[]> {
       tags,
       readingTime,
       views,
-      "like",
       createdAt
     FROM posts
     WHERE published = 1
@@ -104,7 +103,7 @@ async function getPublishedPosts(): Promise<Post[]> {
     LIMIT ${POSTS_PER_PAGE}`
   );
 
-  return result.rows.map((row) => ({
+  const rawPosts = result.rows.map((row) => ({
     id: Number(row.id),
     title: String(row.title ?? ''),
     slug: String(row.slug ?? ''),
@@ -118,10 +117,22 @@ async function getPublishedPosts(): Promise<Post[]> {
     readingTime: Number(row.readingTime ?? 1),
     published: 1,
     views: Number(row.views ?? 0),
-    like: Number(row.like ?? 0),
     createdAt: String(row.createdAt ?? ''),
     updatedAt: String(row.updatedAt ?? row.createdAt ?? ''),
   }));
+
+  // Fetch real like counts in parallel for all published posts
+  const postsWithLikes = await Promise.all(
+    rawPosts.map(async (post) => {
+      const likeCount = await getLike(String(post.id));
+      return {
+        ...post,
+        like: likeCount,
+      };
+    })
+  );
+
+  return postsWithLikes;
 }
 
 function SectionHeading({
