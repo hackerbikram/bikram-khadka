@@ -10,11 +10,15 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: {
-    default: 'DevJournal — Engineering & Tech Insights',
-    template: '%s | DevJournal',
+    default: 'Bikram Article — Ideas & Insights by Bikram Khadka',
+    template: '%s | Bikram Article',
   },
-  description: 'Practical tutorials, architecture deep-dives, and notes on modern web development.',
+  description: 'Personal technical blog and software engineering insights by Bikram Khadka.',
+  verification: {
+    google: 'naAmm34EXkw9DST7sXF1AKbbLR0fDJPxGW1cnz1k3pU',
+  },
 };
+
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
