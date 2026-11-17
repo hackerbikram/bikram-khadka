@@ -1,0 +1,154 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600">
+  <defs>
+    <!-- Metallic Gold Gradient -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF3C4" />
+      <stop offset="30%" stop-color="#E5C170" />
+      <stop offset="65%" stop-color="#B88A3E" />
+      <stop offset="100%" stop-color="#F7E199" />
+    </linearGradient>
+
+    <!-- Metallic Silver Gradient -->
+    <linearGradient id="silverGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="45%" stop-color="#C8D2DC" />
+      <stop offset="80%" stop-color="#7F8C99" />
+      <stop offset="100%" stop-color="#DCE4EC" />
+    </linearGradient>
+
+    <!-- Gear Split Gradient (Gold Left, Silver Right) -->
+    <linearGradient id="gearGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#F5DF9A" />
+      <stop offset="48%" stop-color="#C99D4E" />
+      <stop offset="52%" stop-color="#DCE4EC" />
+      <stop offset="100%" stop-color="#8A99A8" />
+    </linearGradient>
+
+    <!-- Badge Background Radial Gradient -->
+    <radialGradient id="bgGrad" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#1D2633" />
+      <stop offset="75%" stop-color="#131922" />
+      <stop offset="100%" stop-color="#0B0F15" />
+    </radialGradient>
+
+    <!-- Blue Tech Glow -->
+    <radialGradient id="blueGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#60A5FA" stop-opacity="0.85" />
+      <stop offset="50%" stop-color="#3B82F6" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#3B82F6" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Drop Shadow -->
+    <filter id="dropShadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000000" flood-opacity="0.65" />
+    </filter>
+
+    <!-- Curved Text Paths (Bottom Arcs) -->
+    <path id="nameArc" d="M 92,330 A 210,210 0 0,0 508,330" fill="none" />
+    <path id="titleArc" d="M 75,342 A 232,232 0 0,0 525,342" fill="none" />
+  </defs>
+
+  <!-- Outer Dark Ring & Base Circle -->
+  <circle cx="300" cy="300" r="282" fill="#0D1219" filter="url(#dropShadow)" />
+  <circle cx="300" cy="300" r="276" fill="url(#bgGrad)" stroke="#232D3D" stroke-width="3" />
+
+  <!-- Outer Gold Border Ring -->
+  <circle cx="300" cy="300" r="258" fill="none" stroke="url(#goldGrad)" stroke-width="3.5" />
+
+  <!-- Top Gear Crown -->
+  <g transform="translate(300, 235)">
+    <path d="
+      M -126,0
+      L -122,-18 L -103,-19
+      L -94,-41 L -108,-54 L -94,-69 L -79,-57
+      L -57,-69 L -61,-88 L -41,-94 L -34,-76
+      L -10,-79 L -8,-98 L 8,-98 L 10,-79
+      L 34,-76 L 41,-94 L 61,-88 L 57,-69
+      L 79,-57 L 94,-69 L 108,-54 L 94,-41
+      L 103,-19 L 122,-18 L 126,0 Z" fill="url(#gearGrad)" />
+    <!-- Inner Gear Cutout -->
+    <path d="M -82,0 A 82,82 0 0,1 82,0 Z" fill="url(#bgGrad)" />
+    <!-- Tech Arcs Inside Gear -->
+    <path d="M -68,0 A 68,68 0 0,1 68,0" fill="none" stroke="url(#silverGrad)" stroke-width="4" opacity="0.8" />
+    <path d="M -52,0 A 52,52 0 0,1 52,0" fill="none" stroke="#60A5FA" stroke-width="2.5" opacity="0.9" />
+    <circle cx="0" cy="-35" r="38" fill="url(#blueGlow)" />
+  </g>
+
+  <!-- Left Binary Matrix -->
+  <g font-family="&#39;Courier New&#39;, monospace" font-weight="bold" font-size="15" fill="url(#silverGrad)" text-anchor="end" opacity="0.85">
+    <text x="192" y="246">0101</text>
+    <text x="192" y="264">01011</text>
+    <text x="192" y="282">01010</text>
+    <text x="192" y="300">01010</text>
+    <text x="192" y="318">01011</text>
+    <text x="192" y="336">1101</text>
+    <text x="192" y="354">011</text>
+    <text x="192" y="372" opacity="0.5">01</text>
+  </g>
+
+  <!-- Central Monogram: B (Gold Circuit Style) -->
+  <g stroke="url(#goldGrad)" stroke-width="4" fill="none" stroke-linejoin="round">
+    <!-- Outer B Frame -->
+    <path d="M 196,232 L 266,232 C 296,232 310,247 310,268 C 310,285 299,296 284,301 C 304,306 316,320 316,341 C 316,367 297,382 264,382 L 196,382 L 206,370 L 206,244 Z" fill="#131922" />
+    <!-- Inner B Lines -->
+    <path d="M 222,248 L 262,248 C 282,248 292,256 292,269 C 292,282 282,290 262,290 L 222,290 Z" stroke-width="2.5" />
+    <path d="M 222,312 L 264,312 C 286,312 297,322 297,338 C 297,354 286,365 264,365 L 222,365 Z" stroke-width="2.5" />
+    <!-- Vertical Accent Bars in B -->
+    <line x1="234" y1="256" x2="234" y2="282" stroke-width="2" />
+    <line x1="242" y1="256" x2="242" y2="282" stroke-width="2" />
+    <line x1="234" y1="320" x2="234" y2="356" stroke-width="2" />
+    <line x1="242" y1="320" x2="242" y2="356" stroke-width="2" />
+  </g>
+
+  <!-- Central Monogram: K (Silver & Gold Circuit Style) -->
+  <g stroke="url(#silverGrad)" stroke-width="4" fill="none" stroke-linejoin="round">
+    <path d="M 326,232 L 352,232 L 352,294 L 408,232 L 438,232 L 376,301 L 442,382 L 410,382 L 352,310 L 352,382 L 326,382 Z" fill="#131922" />
+    <!-- Inner Circuit Traces inside K -->
+    <polyline points="339,245 339,368" stroke="url(#goldGrad)" stroke-width="2" />
+    <circle cx="339" cy="245" r="3" fill="#131922" stroke="url(#goldGrad)" stroke-width="2" />
+    <polyline points="416,242 365,301 418,368" stroke="url(#goldGrad)" stroke-width="2" />
+    <circle cx="416" cy="242" r="3" fill="#131922" stroke="url(#goldGrad)" stroke-width="2" />
+    <circle cx="418" cy="368" r="3" fill="#131922" stroke="url(#goldGrad)" stroke-width="2" />
+  </g>
+
+  <!-- Circuit Traces Extending Below K -->
+  <g stroke="url(#silverGrad)" stroke-width="2.2" fill="none">
+    <polyline points="352,382 352,412 315,432 292,432" />
+    <circle cx="288" cy="432" r="4" fill="#131922" />
+    <polyline points="374,368 374,424 395,424" />
+    <circle cx="399" cy="424" r="4" fill="#131922" />
+  </g>
+
+  <!-- Right Code Tag {/} -->
+  <g transform="translate(425, 307)">
+    <line x1="-38" y1="0" x2="-22" y2="0" stroke="url(#goldGrad)" stroke-width="2.5" />
+    <text x="15" y="10" font-family="&#39;Segoe UI&#39;, Roboto, monospace" font-weight="bold" font-size="34" fill="url(#goldGrad)" text-anchor="middle">{/}</text>
+  </g>
+
+  <!-- Side Circuit Nodes (Left & Right) -->
+  <g stroke="url(#silverGrad)" stroke-width="2.5" fill="none">
+    <!-- Left Node -->
+    <line x1="125" y1="358" x2="112" y2="332" />
+    <circle cx="110" cy="328" r="4" fill="url(#silverGrad)" />
+    <polyline points="119,346 130,340" />
+    <circle cx="134" cy="338" r="3.5" fill="#131922" />
+
+    <!-- Right Node -->
+    <line x1="475" y1="358" x2="488" y2="332" />
+    <circle cx="490" cy="328" r="4" fill="url(#silverGrad)" />
+    <polyline points="481,346 470,340" />
+    <circle cx="466" cy="338" r="3.5" fill="#131922" />
+    <polyline points="484,339 496,344" />
+    <circle cx="500" cy="346" r="3.5" fill="#131922" />
+  </g>
+
+  <!-- Curved Name: BIKRAM KHADKA -->
+  <text font-family="&#39;Segoe UI&#39;, Arial, sans-serif" font-weight="800" font-size="40" letter-spacing="3" fill="url(#goldGrad)">
+    <textPath href="#nameArc" startOffset="50%" text-anchor="middle">BIKRAM KHADKA</textPath>
+  </text>
+
+  <!-- Curved Subtitle: SOFTWARE ENGINEER | IT PROFESSIONAL -->
+  <text font-family="&#39;Segoe UI&#39;, Arial, sans-serif" font-weight="600" font-size="16" letter-spacing="1.8" fill="url(#silverGrad)">
+    <textPath href="#titleArc" startOffset="50%" text-anchor="middle">SOFTWARE ENGINEER | IT PROFESSIONAL</textPath>
+  </text>
+</svg>

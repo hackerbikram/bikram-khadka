@@ -9,17 +9,21 @@ import Footer from './components/footer';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://bikram-khadka.vercel.app'),
   title: {
     default: 'Bikram Article — Ideas & Insights by Bikram Khadka',
     template: '%s | Bikram Article',
   },
   description: 'Personal technical blog and software engineering insights by Bikram Khadka.',
+  icons: {
+    icon: '/icon.svg',
+    shortcut: '/icon.svg',
+    apple: '/icon.svg',
+  },
   verification: {
     google: 'naAmm34EXkw9DST7sXF1AKbbLR0fDJPxGW1cnz1k3pU',
   },
 };
-
-
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
