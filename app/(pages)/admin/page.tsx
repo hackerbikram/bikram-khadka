@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { db, initDb, type Post } from '@/app/lib/db';
 import DeleteButton from './DeleteButton';
+import { AutoBlogStudio } from '@/app/components/AutoBlogStudio';
 
 export const instant = false;
 
@@ -50,12 +51,15 @@ export default async function AdminDashboard() {
   return (
     <main className="max-w-6xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 border-b border-neutral-200 pb-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8 border-b border-neutral-200 pb-6">
         <div>
           <h1 className="text-3xl font-extrabold text-neutral-950">Blog Administration</h1>
           <p className="text-sm text-neutral-400 mt-1">Manage, edit, publish, and track views across your articles.</p>
         </div>
-        <div className="flex items-center gap-3">
+        
+        {/* Actions Group */}
+        <div className="flex flex-wrap items-center gap-3">
+          <AutoBlogStudio />
           <Link
             href="/create"
             className="bg-neutral-950 text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-neutral-800 transition shadow-xs"
