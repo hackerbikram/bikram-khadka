@@ -8,6 +8,7 @@ import ReactMarkdown from 'react-markdown';
 import { db, initDb, type Post } from '@/app/lib/db';
 import LikeButton from './LikeButton';
 import { getEngagementStats } from '@/app/actions/engagementAction';
+import RecentTracker from '@/app/components/RecentTracker';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 const SITE_NAME = 'Bikram';
@@ -148,6 +149,7 @@ async function PostBodyAndEngagement({ slug }: { slug: string }) {
           />
         </figure>
       )}
+      <RecentTracker slug={post.slug} title={post.title}/>
 
       <div className="prose prose-neutral prose-lg max-w-none prose-headings:font-bold prose-a:text-blue-600 prose-img:rounded-xl">
         {isHtmlContent ? (

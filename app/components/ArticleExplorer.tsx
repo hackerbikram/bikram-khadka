@@ -115,6 +115,7 @@ export default function ArticleExplorer({ posts }: ArticleExplorerProps) {
 
   const [query, setQuery] = useState(initialQuery);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [recentPosts, setRecentPosts] = useState<{ slug: string; title: string }[]>([]);
 
   // Keep query in sync if URL changes
   useEffect(() => {
@@ -123,6 +124,23 @@ export default function ArticleExplorer({ posts }: ArticleExplorerProps) {
       setQuery(q);
     }
   }, [searchParams]);
+
+  // Read recent views from cookie on mount
+  useEffect(() => {
+    try {
+      const cookieName = 'bikram_recent_posts';
+      const existingCookie = document.cookie
+        .split('; ')
+        .find((row) => row.startsWith(`${cookieName}=`));
+
+      if (existingCookie) {
+        const parsed = JSON.parse(decodeURIComponent(existingCookie.split('=')[1]));
+        setRecentPosts(parsed);
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, []);
 
   // Extract unique categories and popular tags
   const categories = useMemo(() => {
@@ -208,6 +226,26 @@ export default function ArticleExplorer({ posts }: ArticleExplorerProps) {
           )}
         </div>
       </div>
+
+      {/* Quick Resume Suggestions based on Cookies */}
+      {recentPosts.length > 0 && (
+        <div className="mb-6 rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-blue-700 mb-2">
+            ⚡ Continue where you left off
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {recentPosts.map((item) => (
+              <Link
+                key={item.slug}
+                href={`/posts/${encodeURIComponent(item.slug)}`}
+                className="rounded-xl bg-white px-3.5 py-2 text-xs font-semibold text-neutral-800 shadow-2xs border border-blue-100 transition hover:bg-blue-600 hover:text-white"
+              >
+                📖 {item.title}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Category Filter Pills */}
       <div className="mb-4 flex flex-wrap gap-2">
