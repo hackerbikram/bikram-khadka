@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { db, initDb, type Post } from '@/app/lib/db';
+import { getPendingCount } from '@/app/actions/contactAdminAction';
 import DeleteButton from './DeleteButton';
 import { AutoBlogStudio } from '@/app/components/AutoBlogStudio';
 
@@ -15,8 +16,14 @@ export default async function AdminDashboard() {
   }
 
   await initDb();
-  const result = await db.execute('SELECT * FROM posts ORDER BY createdAt DESC');
-  const posts = result.rows as unknown as Post[];
+
+  // Fetch posts and pending contacts count in parallel
+  const [postsResult, pendingContactsCount] = await Promise.all([
+    db.execute('SELECT * FROM posts ORDER BY createdAt DESC'),
+    getPendingCount(),
+  ]);
+
+  const posts = postsResult.rows as unknown as Post[];
 
   async function deletePost(formData: FormData) {
     'use server';
@@ -54,22 +61,39 @@ export default async function AdminDashboard() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8 border-b border-neutral-200 pb-6">
         <div>
           <h1 className="text-3xl font-extrabold text-neutral-950">Blog Administration</h1>
-          <p className="text-sm text-neutral-400 mt-1">Manage, edit, publish, and track views across your articles.</p>
+          <p className="text-sm text-neutral-400 mt-1">
+            Manage, edit, publish, and track views across your articles.
+          </p>
         </div>
-        
+
         {/* Actions Group */}
         <div className="flex flex-wrap items-center gap-3">
+          {/* Contacts Navigation Button with Live Pending Badge */}
+          <Link
+            href="/admin/contact"
+            className="inline-flex items-center gap-2 border border-neutral-300 bg-gray-600 text-neutral-200 hover:text-black px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-neutral-50 transition shadow-xs"
+          >
+            <span>Contacts</span>
+            {pendingContactsCount > 0 && (
+              <span className="inline-flex items-center justify-center rounded-full bg-amber-500 px-2 py-0.5 text-xs font-bold text-white">
+                {pendingContactsCount}
+              </span>
+            )}
+          </Link>
+
           <AutoBlogStudio />
+
           <Link
             href="/create"
             className="bg-neutral-950 text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-neutral-800 transition shadow-xs"
           >
             + New Post
           </Link>
+
           <form action={handleLogout}>
             <button
               type="submit"
-              className="border border-neutral-300 text-neutral-400 px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-neutral-100 transition cursor-pointer"
+              className="border border-neutral-300 text-neutral-500 px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-neutral-100 transition cursor-pointer"
             >
               Logout
             </button>
@@ -78,23 +102,44 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Analytics / Stats Banner */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div className="bg-white border border-neutral-200 p-5 rounded-2xl shadow-xs">
-          <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-1">Total Articles</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-1">
+            Total Articles
+          </p>
           <p className="text-2xl font-bold text-neutral-900">{posts.length}</p>
         </div>
+
         <div className="bg-white border border-neutral-200 p-5 rounded-2xl shadow-xs">
-          <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-1">Published Posts</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-1">
+            Published Posts
+          </p>
           <p className="text-2xl font-bold text-emerald-600">
-            {posts.filter(p => p.published === 1).length}
+            {posts.filter((p) => p.published === 1).length}
           </p>
         </div>
+
         <div className="bg-white border border-neutral-200 p-5 rounded-2xl shadow-xs">
-          <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-1">Total Views Tracked</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-1">
+            Total Views Tracked
+          </p>
           <p className="text-2xl font-bold text-blue-600">
             {posts.reduce((acc, p: any) => acc + (p.views || 0), 0)}
           </p>
         </div>
+
+        <Link
+          href="/admin/contact"
+          className="bg-white border border-neutral-200 p-5 rounded-2xl shadow-xs hover:border-amber-300 transition block"
+        >
+          <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-1">
+            Pending Contacts
+          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-2xl font-bold text-amber-600">{pendingContactsCount}</p>
+            <span className="text-xs font-medium text-neutral-400">View →</span>
+          </div>
+        </Link>
       </div>
 
       {/* Posts Table */}
@@ -151,7 +196,11 @@ export default async function AdminDashboard() {
                       👁️ {post.views || 0}
                     </td>
                     <td className="py-4 px-4 text-neutral-500 text-xs">
-                      {new Date(post.createdAt).toLocaleDateString()}
+                      {new Date(post.createdAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                      })}
                     </td>
                     <td className="py-4 px-6 text-right space-x-3">
                       <Link

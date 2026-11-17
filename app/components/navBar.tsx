@@ -16,6 +16,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Articles', href: '/#articles', hash: '#articles' },
   { label: 'Topics', href: '/#topics', hash: '#topics' },
   { label: 'About', href: '/about' },
+  {label: "Contact", href:'/contact'},
 ];
 
 function NavContent() {
