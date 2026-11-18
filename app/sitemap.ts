@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next';
 import { db, type Post } from '@/app/lib/db';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://bikram-khadka.vercel.app';
 
   const result = await db.execute(
     'SELECT slug, updatedAt FROM posts WHERE published = 1 ORDER BY createdAt DESC'
