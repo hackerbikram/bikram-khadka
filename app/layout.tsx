@@ -62,7 +62,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Bikram Article — Ideas & Insights by Bikram Khadka',
     description: 'Personal technical blog and software engineering insights covering full-stack development, Python, Next.js, and modern web architectures.',
-    images: ['/bikram_khadka.jpeg'],
+    images: ['/og-cover.png'],
     creator: '@hackerbikram', // Update with your actual Twitter/X handle if you have one
   },
   icons: {
