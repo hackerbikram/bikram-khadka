@@ -2,7 +2,15 @@
 
 import Link from "next/link";
 import DateUI from "./DateUI";
+import ShareButton from "./shareButton";
 export default function Footer() {
+  const handleShare = () => {
+  // Copies the exact current page URL (e.g., https://bikram-khadka.vercel.app/posts/my-article)
+  const currentUrl = window.location.href; 
+  
+  navigator.clipboard.writeText(currentUrl);
+  alert("Link copied to clipboard!");
+};
   return (
     <footer className="border-t border-neutral-200 bg-white">
 
@@ -40,6 +48,8 @@ export default function Footer() {
               Write
             </Link>
           </nav>
+
+          <ShareButton />
 
         </div>
 

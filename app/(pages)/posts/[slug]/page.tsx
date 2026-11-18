@@ -7,10 +7,11 @@ import { cache, Suspense } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { db, initDb, type Post } from '@/app/lib/db';
 import LikeButton from './LikeButton';
+import ShareButton from '@/app/components/shareButton';
 import { getEngagementStats } from '@/app/actions/engagementAction';
 import RecentTracker from '@/app/components/RecentTracker';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://bikram-khadka.vercel.app';
 const SITE_NAME = 'Bikram';
 
 interface PageProps {
@@ -72,15 +73,49 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!post) {
     return {
-      title: 'Post Not Found',
-      robots: { index: false, follow: false },
+      title: `Post Not Found — ${SITE_NAME}`,
     };
   }
 
+  const postUrl = `${SITE_URL}/posts/${encodeURIComponent(post.slug)}`;
+  const metaTitle = post.metaTitle || post.title;
+  const metaDescription = post.metaDescription || post.excerpt || '';
+  const coverImageUrl = post.coverImage
+    ? post.coverImage.startsWith('http')
+      ? post.coverImage
+      : `${SITE_URL}${post.coverImage.startsWith('/') ? '' : '/'}${post.coverImage}`
+    : undefined;
+
   return {
-    title: `${post.metaTitle || post.title} — ${SITE_NAME}`,
-    description: post.metaDescription || post.excerpt,
-    alternates: { canonical: `${SITE_URL}/posts/${encodeURIComponent(post.slug)}` },
+    title: `${metaTitle} — ${SITE_NAME}`,
+    description: metaDescription,
+    alternates: {
+      canonical: postUrl,
+    },
+    openGraph: {
+      title: metaTitle,
+      description: metaDescription,
+      url: postUrl,
+      siteName: SITE_NAME,
+      type: 'article',
+      publishedTime: post.createdAt ? String(post.createdAt) : undefined,
+      images: coverImageUrl
+        ? [
+            {
+              url: coverImageUrl,
+              width: 1200,
+              height: 630,
+              alt: post.title,
+            },
+          ]
+        : [],
+    },
+    twitter: {
+      card: coverImageUrl ? 'summary_large_image' : 'summary',
+      title: metaTitle,
+      description: metaDescription,
+      images: coverImageUrl ? [coverImageUrl] : [],
+    },
   };
 }
 
@@ -149,7 +184,7 @@ async function PostBodyAndEngagement({ slug }: { slug: string }) {
           />
         </figure>
       )}
-      <RecentTracker slug={post.slug} title={post.title}/>
+      <RecentTracker slug={post.slug} title={post.title} />
 
       <div className="prose prose-neutral prose-lg max-w-none prose-headings:font-bold prose-a:text-blue-600 prose-img:rounded-xl">
         {isHtmlContent ? (
@@ -159,15 +194,18 @@ async function PostBodyAndEngagement({ slug }: { slug: string }) {
         )}
       </div>
 
-      <div className="my-12 flex items-center justify-between border-y border-neutral-200 py-6">
+      <div className="my-12 flex flex-wrap items-center justify-between gap-4 border-y border-neutral-200 py-6">
         <span className="text-sm font-medium text-neutral-600">
           Found this article helpful?
         </span>
-        <LikeButton
-          postId={String(post.id)}
-          initialLikes={stats.totalLikes}
-          initialLiked={stats.userLiked}
-        />
+        <div className="flex items-center gap-3">
+          <LikeButton
+            postId={String(post.id)}
+            initialLikes={stats.totalLikes}
+            initialLiked={stats.userLiked}
+          />
+          <ShareButton title={post.title} />
+        </div>
       </div>
 
       {tagList.length > 0 && (
