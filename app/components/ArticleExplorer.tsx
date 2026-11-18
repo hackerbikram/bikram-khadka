@@ -49,19 +49,19 @@ function ArticleCard({ post, index, onTagClick }: { post: Post; index: number; o
         <span className="rounded-lg bg-blue-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-blue-700">
           {category}
         </span>
-        <span className="text-xs font-medium text-neutral-300">
+        <span className="text-xs font-medium text-neutral-500">
           {String(index + 1).padStart(2, '0')}
         </span>
       </div>
 
       <div className="mt-6 flex-1">
-        <h3 className="text-xl font-bold leading-snug tracking-tight text-neutral-950 transition-colors group-hover:text-blue-600 sm:text-2xl">
+        <h3 className="text-xl font-bold leading-snug tracking-tight text-neutral-900 transition-colors group-hover:text-blue-600 sm:text-2xl">
           <Link href={`/posts/${encodeURIComponent(post.slug)}`}>
             {post.title}
           </Link>
         </h3>
 
-        <p className="mt-3 line-clamp-3 text-sm leading-7 text-neutral-500">
+        <p className="mt-3 line-clamp-3 text-sm leading-7 text-neutral-600">
           {post.excerpt}
         </p>
       </div>
@@ -81,7 +81,7 @@ function ArticleCard({ post, index, onTagClick }: { post: Post; index: number; o
         </div>
       )}
 
-      <div className="mt-5 flex items-center gap-3 font-mono text-xs text-neutral-500">
+      <div className="mt-5 flex items-center gap-3 font-mono text-xs text-neutral-600">
         <span>👁️ {post.views ?? 0} views</span>
         <span>·</span>
         <span>❤️ {likes} likes</span>
@@ -89,10 +89,10 @@ function ArticleCard({ post, index, onTagClick }: { post: Post; index: number; o
 
       <div className="mt-5 flex items-center justify-between border-t border-neutral-100 pt-4">
         <div className="flex flex-col gap-0.5">
-          <time className="text-xs font-semibold text-neutral-700">
+          <time className="text-xs font-semibold text-neutral-600">
             {formatDate(post.createdAt)}
           </time>
-          <span className="text-[11px] text-neutral-400">
+          <span className="text-[11px] text-neutral-500">
             {post.readingTime || 1} min read
           </span>
         </div>
@@ -100,7 +100,7 @@ function ArticleCard({ post, index, onTagClick }: { post: Post; index: number; o
         <Link
           href={`/posts/${encodeURIComponent(post.slug)}`}
           aria-label={`Read ${post.title}`}
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 text-lg transition group-hover:border-neutral-950 group-hover:bg-neutral-950 group-hover:text-white"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 text-lg transition group-hover:border-blue-600 group-hover:bg-blue-600 group-hover:text-white"
         >
           <span aria-hidden="true">↗</span>
         </Link>
@@ -193,7 +193,7 @@ export default function ArticleExplorer({ posts }: ArticleExplorerProps) {
           <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-blue-600">
             Instant Discovery
           </p>
-          <h2 className="mt-2 text-3xl font-bold tracking-[-0.04em] text-neutral-950 sm:text-4xl">
+          <h2 className="mt-2 text-3xl font-bold tracking-[-0.04em] text-neutral-900 sm:text-4xl">
             Explore articles
           </h2>
         </div>
@@ -206,7 +206,7 @@ export default function ArticleExplorer({ posts }: ArticleExplorerProps) {
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by title, #tag, or topic..."
             aria-label="Search articles by title, tag, or topic"
-            className="w-full rounded-2xl border border-neutral-200 bg-white py-3.5 pl-11 pr-10 text-sm text-neutral-950 shadow-2xs placeholder:text-neutral-400 transition focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
+            className="w-full rounded-2xl border border-neutral-200 bg-white py-3.5 pl-11 pr-10 text-sm text-neutral-900 shadow-2xs placeholder:text-neutral-500 transition focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-600/10"
           />
           <span
             aria-hidden="true"
@@ -219,7 +219,7 @@ export default function ArticleExplorer({ posts }: ArticleExplorerProps) {
               type="button"
               onClick={() => setQuery('')}
               aria-label="Clear search"
-              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg px-2 py-0.5 text-xs font-semibold text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 cursor-pointer"
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg px-2 py-0.5 text-xs font-semibold text-neutral-500 hover:bg-neutral-100 hover:text-neutral-400 cursor-pointer"
             >
               ✕
             </button>
@@ -258,7 +258,7 @@ export default function ArticleExplorer({ posts }: ArticleExplorerProps) {
               onClick={() => setSelectedCategory(cat)}
               className={`rounded-full px-4 py-2 text-xs font-semibold transition cursor-pointer ${
                 active
-                  ? 'bg-neutral-950 text-white shadow-xs'
+                  ? 'bg-blue-600 text-white shadow-xs'
                   : 'border border-neutral-200 bg-white text-neutral-600 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700'
               }`}
             >
@@ -295,7 +295,7 @@ export default function ArticleExplorer({ posts }: ArticleExplorerProps) {
       )}
 
       {/* Results Count */}
-      <div className="mb-6 flex items-center justify-between text-xs font-semibold text-neutral-400">
+      <div className="mb-6 flex items-center justify-between text-xs font-semibold text-neutral-600">
         <span>
           SHOWING {filteredPosts.length} OF {posts.length}{' '}
           {posts.length === 1 ? 'ARTICLE' : 'ARTICLES'}
@@ -329,7 +329,7 @@ export default function ArticleExplorer({ posts }: ArticleExplorerProps) {
               setQuery('');
               setSelectedCategory('All');
             }}
-            className="mt-5 rounded-xl bg-neutral-950 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-blue-600 cursor-pointer"
+            className="mt-5 rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-blue-600 cursor-pointer"
           >
             Show all articles
           </button>
